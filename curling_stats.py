@@ -6,6 +6,7 @@ Module Docstring
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -14,9 +15,25 @@ def main():
     resp = get(url)
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # for tag in soup.find_all(re.compile("td")):
-    #    print(tag)
+    df = get_stats(soup)
+    print(df)
 
+    plot_wins(df, 10)
+    #plot_wins_v_loses(df)
+
+
+def plot_wins(df, qty=5):
+    df[:qty].plot.bar(x="Team", y="W")
+    plt.show()
+
+
+# def plot_wins_v_loses(df, qty=5):
+#     for x in range(qty - 1):
+#         df[x].plot.scatter(x="L", y="W")
+#         plt.show()
+
+
+def get_stats(soup):
     rows_list = []
 
     for tr in soup.find_all("tr"):
@@ -24,17 +41,17 @@ def main():
         rank = ""
         for td in tr.find_all("td"):
             if td.get("data-th") == "Rank":
-                rank = td.text.strip()[:-1]
+                rank = int(td.text.strip()[:-1])
             if td.get("data-th") == "Team":
                 team = td.text.strip()
             if td.get("data-th") == "Location":
                 location = td.text.strip()
             if td.get("data-th") == "W":
-                wins = td.text.strip()
+                wins = int(td.text.strip())
             if td.get("data-th") == "L":
-                loses = td.text.strip()
+                loses = int(td.text.strip())
             if td.get("data-th") == "T":
-                ties = td.text.strip()
+                ties = int(td.text.strip())
             if td.get("data-th") == "PCT":
                 pct = td.text.strip()
             if td.get("data-th") == "HMR":
@@ -64,8 +81,7 @@ def main():
             }
             rows_list.append(row)
 
-    df = pd.DataFrame(rows_list)
-    print(df)
+    return pd.DataFrame(rows_list)
 
 
 if __name__ == "__main__":
