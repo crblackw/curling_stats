@@ -18,19 +18,15 @@ def main():
     df = get_stats(soup)
     print(df)
 
-    plot_wins(df, 10)
-    #plot_wins_v_loses(df)
+    plot_stats(df, 5, "L")
 
 
-def plot_wins(df, qty=5):
-    df[:qty].plot.bar(x="Team", y="W")
+def plot_stats(df, qty=5, category="W", sort="Rank"):
+    if sort == "Rank":
+        df.sort_values(by=[sort])[:qty].plot.bar(x="Team", y=category)
+    else:
+        df.sort_values(by=[sort], ascending=False)[:qty].plot.bar(x="Team", y=category)
     plt.show()
-
-
-# def plot_wins_v_loses(df, qty=5):
-#     for x in range(qty - 1):
-#         df[x].plot.scatter(x="L", y="W")
-#         plt.show()
 
 
 def get_stats(soup):
@@ -54,6 +50,10 @@ def get_stats(soup):
                 ties = int(td.text.strip())
             if td.get("data-th") == "PCT":
                 pct = td.text.strip()
+                if pct == "---":
+                    pct = 0.00
+                else:
+                    pct = float(pct)
             if td.get("data-th") == "HMR":
                 hmr = td.text.strip()
             if td.get("data-th") == "STL":
